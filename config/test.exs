@@ -4,6 +4,8 @@ config :logger, level: :warn
 
 config :ex_aws, :dynamodb,
   scheme: "http://",
+  access_key_id: "DUMMY_FOR_DYNAMO_LOCAL",
+  secret_access_key: "DUMMY_FOR_DYNAMO_LOCAL",
   host: System.get_env("DYNAMODB_HOST") || "localhost",
   port: 8000,
   region: "us-east-1",
