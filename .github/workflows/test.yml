@@ -9,9 +9,10 @@ jobs:
         otp: ['21.x', '22.x', '23.x']
         elixir: ['1.8.x', '1.9.x', '1.10.x']
     services:
-      dynamodb: amazon/dynamodb-local
-      ports:
-        - 8000:8000
+      dynamodb:
+        image: amazon/dynamodb-local
+        ports:
+          - 8000:8000
     env:
       MIX_ENV: test
     steps:
@@ -23,11 +24,12 @@ jobs:
       - name: cache mix.deps
         id: cache-deps
         uses: actions/cache@v2
-        with: |
-          deps
-          _build
-        key: v1-surge-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
-        restore-keys: v1-surge-
+        with:
+          path: |
+            deps
+            _build
+          key: v1-surge-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+          restore-keys: v1-surge-
       - name: execute mix deps.get if cache miss happened
         if: steps.cache-deps.outputs.cache-hit != 'true'
         run: |
