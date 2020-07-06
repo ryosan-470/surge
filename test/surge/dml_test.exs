@@ -5,16 +5,24 @@ defmodule Surge.DMLTest do
 
   defmodule HashModel do
     use Surge.Model
+
     schema do
-      hash id: {:number, nil}
-      attributes name: {:string, "foo"}, age: {:number, 0}, lock_version: {:number, 0}, admin: {:boolean, false}
-      index global: :age, hash: :age, projection: :keys
+      hash(id: {:number, nil})
+
+      attributes(
+        name: {:string, "foo"},
+        age: {:number, 0},
+        lock_version: {:number, 0},
+        admin: {:boolean, false}
+      )
+
+      index(global: :age, hash: :age, projection: :keys)
     end
   end
 
   test "PutItem/GetItem" do
-    Surge.DDL.delete_table HashModel
-    Surge.DDL.create_table HashModel
+    Surge.DDL.delete_table(HashModel)
+    Surge.DDL.create_table(HashModel)
 
     alice = %HashModel{id: 1, name: "alice", age: 20}
 
@@ -30,7 +38,8 @@ defmodule Surge.DMLTest do
     assert expect == put_item(update_alice, into: HashModel, if: "attribute_not_exists(id)")
 
     assert alice == get_item(hash: 1, from: HashModel)
-    assert alice.age == 20 # not updated
+    # not updated
+    assert alice.age == 20
 
     # lock_version
     if_exp = ["attribute_not_exists(lock_version) OR #lock_version = ?", alice.lock_version]
@@ -51,8 +60,9 @@ defmodule Surge.DMLTest do
     assert alice.age == 21
     assert alice.lock_version == 1
 
-
-    assert_raise Surge.Exceptions.NoDefindedRangeException, fn -> get_item(hash: 999, range: 999, from: HashModel) end
+    assert_raise Surge.Exceptions.NoDefindedRangeException, fn ->
+      get_item(hash: 999, range: 999, from: HashModel)
+    end
 
     assert %{} == delete_item(hash: 1, from: HashModel)
     assert Surge.DDL.describe_table(HashModel)["ItemCount"] == 0
@@ -61,8 +71,8 @@ defmodule Surge.DMLTest do
   end
 
   test "PutItem!" do
-    Surge.DDL.delete_table HashModel
-    Surge.DDL.create_table HashModel
+    Surge.DDL.delete_table(HashModel)
+    Surge.DDL.create_table(HashModel)
 
     alice = %HashModel{id: 1, name: "alice", age: 20}
 
@@ -70,21 +80,25 @@ defmodule Surge.DMLTest do
     assert Surge.DDL.describe_table(HashModel)["ItemCount"] == 1
 
     update_alice = %{alice | age: 99}
-    assert_raise(ExAws.Error, fn -> put_item!(update_alice, into: HashModel, if: "attribute_not_exists(id)") end)
+
+    assert_raise(ExAws.Error, fn ->
+      put_item!(update_alice, into: HashModel, if: "attribute_not_exists(id)")
+    end)
   end
 
   defmodule HashRangeModel do
     use Surge.Model
+
     schema do
-      hash id: {:number, nil}
-      range time: {:number, nil}
-      attributes name: {:string, "foo"}, age: {:number, 0}
+      hash(id: {:number, nil})
+      range(time: {:number, nil})
+      attributes(name: {:string, "foo"}, age: {:number, 0})
     end
   end
 
   test "PutItem/GetItem HashRange" do
-    Surge.DDL.delete_table HashRangeModel
-    Surge.DDL.create_table HashRangeModel
+    Surge.DDL.delete_table(HashRangeModel)
+    Surge.DDL.create_table(HashRangeModel)
 
     alice = %HashRangeModel{id: 1, time: 100, name: "alice", age: 20}
 

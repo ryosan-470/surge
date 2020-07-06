@@ -5,9 +5,9 @@ defmodule Surge.ModelTest do
     use Surge.Model
 
     schema do
-      hash id: {:string, ""}
-      attributes name: {:string, "foo"}, age: {:number, 0}
-      throughput read: 10, write: 3
+      hash(id: {:string, ""})
+      attributes(name: {:string, "foo"}, age: {:number, 0})
+      throughput(read: 10, write: 3)
     end
 
     def is_hash_model?(data) do
@@ -19,10 +19,15 @@ defmodule Surge.ModelTest do
   end
 
   test "HashModel" do
-    assert HashModel.__keys__ == [hash: {:id, :string}]
-    assert HashModel.__table_name__ == "Surge.Test.HashModel"
-    assert HashModel.__throughput__ == [10, 3]
-    assert HashModel.__attributes__ == [age: {:number, 0}, name: {:string, "foo"}, id: {:string, ""}]
+    assert HashModel.__keys__() == [hash: {:id, :string}]
+    assert HashModel.__table_name__() == "Surge.Test.HashModel"
+    assert HashModel.__throughput__() == [10, 3]
+
+    assert HashModel.__attributes__() == [
+             age: {:number, 0},
+             name: {:string, "foo"},
+             id: {:string, ""}
+           ]
 
     hash_model = %Surge.ModelTest.HashModel{}
     assert hash_model.name == "foo"
@@ -33,16 +38,17 @@ defmodule Surge.ModelTest do
 
   defmodule HashRangeModel do
     use Surge.Model
+
     schema do
-      hash id: {:string, ""}
-      range time: {:number, nil}
-      attributes name: {:string, "foo"}, age: {:number, 0}
-      index local: Name, range: :name, projection: :keys
+      hash(id: {:string, ""})
+      range(time: {:number, nil})
+      attributes(name: {:string, "foo"}, age: {:number, 0})
+      index(local: Name, range: :name, projection: :keys)
     end
   end
 
   test "HashRangeModel" do
-    assert HashRangeModel.__keys__ == [hash: {:id, :string}, range: {:time, :number}]
+    assert HashRangeModel.__keys__() == [hash: {:id, :string}, range: {:time, :number}]
 
     hash_range_model = %Surge.ModelTest.HashRangeModel{}
     assert hash_range_model.name == "foo"
@@ -53,9 +59,10 @@ defmodule Surge.ModelTest do
     assert_raise ArgumentError, "Unknown dynamo type for value: :unknown_type", fn ->
       defmodule UnknownTypeModel do
         use Surge.Model
+
         schema do
-          hash id: {:number, nil}
-          attributes name: {:unknown_type, nil}
+          hash(id: {:number, nil})
+          attributes(name: {:unknown_type, nil})
         end
       end
     end
